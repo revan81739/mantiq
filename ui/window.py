@@ -1,6 +1,8 @@
 import tkinter as tk
+from logic.parser import Parser
 from PIL import Image, ImageTk
 from ui import theme
+from logic.lexer import Lexer
 
 class MantiqWindow:
     def __init__(self, root):
@@ -9,8 +11,8 @@ class MantiqWindow:
         self.root.geometry("1000x700")
         self.root.configure(bg=theme.BACKGROUND)
         machine_image=Image.open("assets/machine.png")
-        machine_image=machine_image.resize((400,300))
-        self.machine_photo=ImageTk.PhotoImage(machine_image, Image.Resampling.NEAREST)
+        machine_image=machine_image.resize((400,300), Image.Resampling.NEAREST)
+        self.machine_photo=ImageTk.PhotoImage(machine_image)
         self.machine_label=tk.Label(
             self.root,
             image=self.machine_photo,
@@ -45,9 +47,12 @@ class MantiqWindow:
         )
         self.output_box.pack(pady=10)
     def insert_card(self):
+        lexer = Lexer()
+        text=self.input_box.get("1.0", tk.END)
+        tokens=lexer.tokenize(text)
+        parser =Parser(tokens)
+        tree=parser.parse()
         self.output_box.delete("1.0", tk.END)
-        self.output_box.insert(
-            tk.END,
-            "Processing card...\n\n"
-            "Processing complete"
-            )
+        
+        self.output_box.insert(tk.END, str(tree))
+            
