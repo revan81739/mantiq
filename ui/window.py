@@ -1,4 +1,6 @@
 import tkinter as tk
+from logic.verifier import Verifier
+from logic.evaluator import Evaluator
 from logic.parser import Parser
 from PIL import Image, ImageTk
 from ui import theme
@@ -52,7 +54,12 @@ class MantiqWindow:
         tokens=lexer.tokenize(text)
         parser =Parser(tokens)
         tree=parser.parse()
+
+        verifier = Verifier()
+        results= verifier.verify(tree)
+        
         self.output_box.delete("1.0", tk.END)
         
-        self.output_box.insert(tk.END, str(tree))
+        for assignment, result in results:
+            self.output_box.insert(tk.END, f"{assignment} -> {results}\n")
             

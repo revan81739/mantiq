@@ -4,40 +4,60 @@ class Parser:
     def __init__(self, tokens):
         self.tokens=tokens
         self.position=0
+    
     def current(self):
         if self.position >=len(self.tokens):
             return None
         return self.tokens[self.position]
+    
     def advance(self):
         self.position+=1
-    def parse(self):
-        return self.expression()
-    def expression(self):
+
+    def match(self, *types):
         token=self.current()
-        if token is None:
-            return None
-        if token.token_type=="NOT":
+        if token and token.token_type in types:
             self.advance()
-            return Not(self.expression())
-        if token.token_type=="IF":
-            self.advance()
-            left=self.expression()
-            if self.current().token_type!="THEN":
-                raise ValueError("expected THEN")
-            self.advance()
-            right=self.expression()
+            return token
+        return None
+
+    def expect(self, token_type):
+        token=self.current()
+        if token is None or token.token_type != token_type:
+            raise ValueError(f"Expected {token_type}")
+        self.advance()
+        return token
+    
+    def parse(self):
+        return self.parse_implication()
+
+    def parse_implication(self):
+        if self.match("IF"):
+            left=self.parse_or()
+            self.expect("THEN")
+            right=self.parse_implication()
             return Binary(left, "IMPLIES", right)
-        if token.token_type=="IDENTIFIER":
-            left=Identifier(token.value)
-            self.advance()
-            token=self.current()
-            if token is None:
-                return left
-            if token.token_type in ("AND", "OR"):
-                operator=token.token_type
-                self.advance()
-                right=self.expression()
-                return Binary(left, operator, right)
-            return left
-        raise ValueError(f"Unexpected token {token.token_type}")
-        
+        return self.parse_or()
+
+    def parse_or(self):
+        node = self.parse_and()
+        while self.match("OR"):
+            right =self.parse_and()
+            node = Binary(node, "OR", right)
+        return node
+
+    def parse_and(self):
+        node=self.parse_not()
+        while self.match("AND"):
+            right=self.parse_not()
+            node=Binary(node, "AND", right)
+        return node
+
+    def parse_not(self):
+        if self.match("NOT"):
+            return Not(self.parse_not())
+        return self.parse_primary()
+
+    def parse_primary(self):
+        token=self.expect("IDENTIFIER")
+        return Identifier(token.value)
+    
