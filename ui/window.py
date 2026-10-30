@@ -56,13 +56,16 @@ class MantiqWindow:
         argument=parser.parse_argument()
 
         verifier = Verifier()
-        table=verifier.generate_truth_table(tree)
+        valid, counterexample = verifier.verify_argument(argument)
+
         
         self.output_box.delete("1.0", tk.END)
         
-        for row in table:
-            self.output_box.insert(tk.END, f"{row['assignment']} -> {row['result']}\n")
-        self.output_box.insert(tk.END, "\n")
-        self.output_box.insert(tk.END, f"Tautology: {verifier.is_tautology(tree)}\n")
-        self.output_box.insert(tk.END, f"Satisfiable: {verifier.is_satisfiable(tree)}")
-            
+        if valid:
+            self.output_box.insert(tk.END, "VALID\n\n" 
+                                   "No counterexample exists")
+        else:
+            self.output_box.insert(tk.END,"INVALID\n\n"
+                                   "Counterexample:\n\n")
+            for variable, value in counterexample.items():
+                self.output_box.insert(tk.END, f"{variable}={value}\n")
