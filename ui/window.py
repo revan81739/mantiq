@@ -53,13 +53,16 @@ class MantiqWindow:
         text=self.input_box.get("1.0", tk.END)
         tokens=lexer.tokenize(text)
         parser =Parser(tokens)
-        tree=parser.parse()
+        argument=parser.parse_argument()
 
         verifier = Verifier()
-        results= verifier.verify(tree)
+        table=verifier.generate_truth_table(tree)
         
         self.output_box.delete("1.0", tk.END)
         
-        for assignment, result in results:
-            self.output_box.insert(tk.END, f"{assignment} -> {results}\n")
+        for row in table:
+            self.output_box.insert(tk.END, f"{row['assignment']} -> {row['result']}\n")
+        self.output_box.insert(tk.END, "\n")
+        self.output_box.insert(tk.END, f"Tautology: {verifier.is_tautology(tree)}\n")
+        self.output_box.insert(tk.END, f"Satisfiable: {verifier.is_satisfiable(tree)}")
             

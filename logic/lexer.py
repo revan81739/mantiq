@@ -14,5 +14,6 @@ class Lexer:
                     tokens.append(Token(word,word))
                 else:
                     tokens.append(Token("IDENTIFIER", word))
+            tokens.append(Token("NEWLINE", "\n"))
         return tokens
     

@@ -17,3 +17,8 @@ class Binary(Node):
     operator:str
     right:Node
 
+@dataclass
+class Argument:
+    premises: list
+    conclusion: Node
+

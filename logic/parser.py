@@ -1,4 +1,7 @@
+import token
+
 from logic.ast import Identifier, Not, Binary
+from logic.ast import Argument
 
 class Parser:
     def __init__(self, tokens):
@@ -29,6 +32,23 @@ class Parser:
     
     def parse(self):
         return self.parse_implication()
+
+    def parse_argument(self):
+        premises=[]
+        while True:
+            while self.match("NEWLINE"):
+                pass
+            token =self.current()
+            if token is None:
+                raise ValueError("Missing VERIFY statement")
+            if token.token_type=="VERIFY":
+                break
+            premises.append(self.parse_implication())
+            self.match("NEWLINE")
+            self.expect("VERIFY")
+            conclusion=self.parse_implication()
+            return Argument(premises, conclusion)
+
 
     def parse_implication(self):
         if self.match("IF"):
