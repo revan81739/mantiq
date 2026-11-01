@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from resources import resource_path
 import pygame
 from logic.errors import format_error
 from logic.examples import EXAMPLES
@@ -19,7 +20,7 @@ class MantiqWindow:
         self.root.configure(bg=theme.BACKGROUND)
 
         pygame.mixer.init()
-        self.typewriter_sound= pygame.mixer.Sound("sound/typewriter.wav")
+        self.typewriter_sound= pygame.mixer.Sound(resource_path("sound/typewriter.wav"))
         self.typewriter_sound.set_volume(0.5)
 
         self.current_argument=None
@@ -87,7 +88,7 @@ class MantiqWindow:
 
 
 
-        machine_image=Image.open("assets/machine.png")
+        machine_image=Image.open(resource_path("assets/machine.png"))
         machine_image=machine_image.resize((400,300), Image.Resampling.NEAREST)
         self.machine_photo=ImageTk.PhotoImage(machine_image)
         self.machine_label=tk.Label(
