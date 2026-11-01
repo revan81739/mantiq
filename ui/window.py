@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 from logic.examples import EXAMPLES
 from logic.reporter import Reporter
 from logic.verifier import Verifier
@@ -59,6 +60,16 @@ class MantiqWindow:
         )
         self.truth_button.pack(pady=40)
 
+        self.table_frame=tk.Frame(self.right_frame, bg=theme.BACKGROUND)
+        self.table_frame.pack(pady=20)
+        self.truth_table=ttk.Treeview(
+            self.table_frame,
+            show="headings",
+            height= 8
+        )
+        self.truth_table.pack()
+
+
 
         machine_image=Image.open("assets/machine.png")
         machine_image=machine_image.resize((400,300), Image.Resampling.NEAREST)
@@ -76,7 +87,7 @@ class MantiqWindow:
             bg=theme.PAPER,
             fg=theme.INK,
             font=("Courier", 12)
-        )
+        )#im not even close to finishing this
         self.input_box.pack(pady=10)
         self.insert_button=tk.Button(
             self.left_frame,
@@ -106,27 +117,49 @@ class MantiqWindow:
     
     def show_truth_table(self):
         if self.current_argument is None:
-            self.output_box.delete("1.0", tk.END)
-            self.output_box.insert(tk.END, "Please insert punch card first")
             return
+        
         verifier= Verifier()
         table=verifier.generate_argument_truth_table(self.current_argument)
-        self.output_box.delete("1.0", tk.END)
+
+        for item in self.truth_table.get_children():
+            self.truth_table.delete(item)
+        variables= sorted(verifier.get_argument_variables(self.current_argument))
+        columns= (variables + ["Premises", "Conclusion"])
+        self.truth_table["columns"] = columns
+        #if you are reading this repent and turn to the Most Merciful
+        
+        for column in columns:
+            self.truth_table.heading(column, text=column)
+            self.truth_table.column(
+                column, width=70,
+                anchor="center"
+            )
+
 
         for row in table:
-            self.output_box.insert(
+            values = []
+            for variable in variables:
+                values.append(
+                    "T"
+                    if row["assignment"][variable]
+                    else "F"
+            )
+
+            values.append(
+                "T"
+                if all(row["premises"])
+                else "F"
+            )
+            values.append(
+                "T"
+                if row["conclusion"]
+                else "F"
+            )
+            self.truth_table.insert(
+                "",
                 tk.END,
-                str(row["assignment"])
-                +
-                " | Premises:"
-                +
-                str(row["premises"])
-                +
-                " | Conclusion:"
-                +
-                str(row["conclusion"])
-                +
-                "\n"
+                values=values
             )
 
     def insert_card(self):
@@ -146,5 +179,3 @@ class MantiqWindow:
         self.output_box.delete("1.0", tk.END)
 
         self.output_box.insert(tk.END, report)
-        
-       
