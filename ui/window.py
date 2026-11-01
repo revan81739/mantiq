@@ -1,4 +1,5 @@
 import tkinter as tk
+from logic.examples import EXAMPLES
 from logic.reporter import Reporter
 from logic.verifier import Verifier
 from logic.evaluator import Evaluator
@@ -13,17 +14,52 @@ class MantiqWindow:
         self.root.title("Mantiq - Logical Reasoner")
         self.root.geometry("1000x700")
         self.root.configure(bg=theme.BACKGROUND)
+        self.main_frame=tk.Frame(self.root, bg=theme.BACKGROUND)
+        self.main_frame.pack(fill="both", expand =True)
+        self.left_frame=tk.Frame(self.main_frame, bg=theme.BACKGROUND)
+        self.right_frame=tk.Frame(self.main_frame, bg=theme.BACKGROUND, width=250)
+        self.left_frame.pack(
+            side="left",
+            fill="both",
+            expand=True,
+            padx=20,
+            pady=20
+        )
+        self.right_frame.pack(
+            side="right",
+            fill="y",
+            padx=20,
+            pady=20
+        )
+        tk.Label(
+            self.right_frame,
+            text="Punch Card Library",
+            bg=theme.BACKGROUND,
+            font=("Courier", 12, "bold"),
+        ).pack(anchor="n")
+        self.selected_example=tk.StringVar()
+        self.selected_example.set("Select an example...")
+        self.dropdown=tk.OptionMenu(
+            self.right_frame,
+            self.selected_example,
+            *EXAMPLES.keys(),
+            command=self.load_example
+        )
+        self.dropdown.config(font=("Courier", 11), width=24)
+        self.dropdown.pack(pady=10)
+
+
         machine_image=Image.open("assets/machine.png")
         machine_image=machine_image.resize((400,300), Image.Resampling.NEAREST)
         self.machine_photo=ImageTk.PhotoImage(machine_image)
         self.machine_label=tk.Label(
-            self.root,
+            self.left_frame,
             image=self.machine_photo,
             bg=theme.BACKGROUND
         )
         self.machine_label.pack(pady=20)
         self.input_box=tk.Text(
-            self.root,
+            self.left_frame,
             height=8,
             width=50,
             bg=theme.PAPER,
@@ -32,7 +68,7 @@ class MantiqWindow:
         )
         self.input_box.pack(pady=10)
         self.insert_button=tk.Button(
-            self.root,
+            self.left_frame,
             text="Insert punch card",
             command=self.insert_card,
             bg=theme.BUTTON,
@@ -41,7 +77,7 @@ class MantiqWindow:
         )
         self.insert_button.pack(pady=10)
         self.output_box=tk.Text(
-            self.root,
+            self.left_frame,
             height=10,
             width=50,
             bg=theme.PAPER,
@@ -49,6 +85,15 @@ class MantiqWindow:
             font=("Courier", 12)
         )
         self.output_box.pack(pady=10)
+
+    def load_example(self, selection):
+        if not EXAMPLES[selection]:
+            return
+        
+        self.input_box.delete("1.0", tk.END)
+        self.input_box.insert(tk.END, EXAMPLES[selection])
+    
+    
     def insert_card(self):
         lexer = Lexer()
         text=self.input_box.get("1.0", tk.END)
