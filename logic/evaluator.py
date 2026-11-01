@@ -15,6 +15,14 @@ class Evaluator:
                 return left or right
             if node.operator=="IMPLIES":
                 return (not left) or right
+            if node.operator=="IFF":
+                return left==right
+            if node.operator=="XOR":
+                return left != right
+            if node.operator=="NAND":
+                return not (left and right)
+            if node.operator=="NOR":
+                return not (left or right)
 
         raise ValueError("Unknown node")
         

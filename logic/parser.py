@@ -28,6 +28,7 @@ class Parser:
             raise ValueError(f"Expected {token_type}")
         self.advance()
         return token
+    
     def skip_newlines(self):
         while self.match("NEWLINE"):
             pass
@@ -54,20 +55,41 @@ class Parser:
             self.expect("THEN")
             right=self.parse_implication()
             return Binary(left, "IMPLIES", right)
-        return self.parse_or()
+        node=self.parse_or()
+
+        while self.match("IFF"):
+            right= self.parse_or()
+            node= Binary(node, "IFF", right)
+        return node
 
     def parse_or(self):
         node = self.parse_and()
-        while self.match("OR"):
-            right =self.parse_and()
-            node = Binary(node, "OR", right)
+        while True:
+        
+            if self.match("OR"):
+                right= self.parse_and()
+                node=Binary(node, "OR", right)
+            elif self.match("XOR"):
+                right= self.parse_and()
+                node=Binary(node, "XOR", right)
+            elif self.match("NOR"):
+                right=self.parse_and()
+                node=Binary(node, "NOR", right)
+            else:
+                break
         return node
 
     def parse_and(self):
         node=self.parse_not()
-        while self.match("AND"):
-            right=self.parse_not()
-            node=Binary(node, "AND", right)
+        while True:
+            if self.match("AND"):
+                right=self.parse_not()
+                node=Binary(node, "AND", right)
+            elif self.match("NAND"):
+                right=self.parse_not()
+                node= Binary(node, "NAND", right)
+            else:
+                break
         return node
 
     def parse_not(self):

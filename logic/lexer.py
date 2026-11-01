@@ -2,7 +2,7 @@ import re
 from logic.token import Token
 
 class Lexer:
-    keywords={"IF", "THEN", "AND", "OR", "NOT", "VERIFY", "(", ")"}
+    keywords={"IF", "THEN", "AND", "OR", "NOT", "VERIFY", "(", ")", "IFF", "XOR", "NAND", "NOR"}
     
     
     def tokenize(self, text):

@@ -34,5 +34,26 @@ Verify P""",
 """If P Then Q
 Not P
     
-Verify Not Q"""
+Verify Not Q""",
+
+    "Mutually Exclusive Clash":
+"""P XOR Q
+P
+
+Verify Q""",
+
+    "IFF Example":
+"""P IFF Q
+
+Verify P IFF Q""",
+
+    "NAND Example":
+"""P NAND Q
+
+Verify P NAND Q""",
+
+    "NOR Example":
+"""P NOR Q
+
+Verify P NOR Q"""
 }

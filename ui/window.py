@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
+import pygame
 from logic.errors import format_error
-
 from logic.examples import EXAMPLES
 from logic.reporter import Reporter
 from logic.verifier import Verifier
@@ -17,6 +17,11 @@ class MantiqWindow:
         self.root.title("Mantiq - Logical Reasoner")
         self.root.geometry("1000x700")
         self.root.configure(bg=theme.BACKGROUND)
+
+        pygame.mixer.init()
+        self.typewriter_sound= pygame.mixer.Sound("sound/typewriter.wav")
+        self.typewriter_sound.set_volume(0.5)
+
         self.current_argument=None
         self.main_frame=tk.Frame(self.root, bg=theme.BACKGROUND)
         self.main_frame.pack(fill="both", expand =True)
@@ -189,7 +194,10 @@ class MantiqWindow:
     def insert_card(self):
        
         try:
-       
+            self.insert_button.config(state="disabled")
+            
+            self.typewriter_sound.stop()
+            self.typewriter_sound.play(loops=-1)
        
             lexer = Lexer()
             text=self.input_box.get("1.0", tk.END)
@@ -204,7 +212,26 @@ class MantiqWindow:
             reporter=Reporter()
             report= reporter.generate(argument, valid, counterexample)
             self.output_box.delete("1.0", tk.END)
-            self.output_box.insert(tk.END, report)
+            self.full_report= report
+            self.current_index = 0
+            self.animate_output()
+            
+        
         except Exception as error:
+            self.typewriter_sound.stop()
             self.output_box.delete("1.0", tk.END)
             self.output_box.insert(tk.END, format_error(error))
+
+
+    def animate_output(self):
+        if self.current_index < len(self.full_report):
+            self.output_box.insert(
+                tk.END,
+                self.full_report[self.current_index]
+            )
+            self.output_box.see(tk.END)
+            self.current_index += 1
+            self.root.after(25, self.animate_output)
+        else:
+            self.typewriter_sound.stop()
+            self.insert_button.config(state="normal")
