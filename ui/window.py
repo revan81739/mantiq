@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
+from logic.errors import format_error
+
 from logic.examples import EXAMPLES
 from logic.reporter import Reporter
 from logic.verifier import Verifier
@@ -68,6 +70,15 @@ class MantiqWindow:
             height= 8
         )
         self.truth_table.pack()
+        self.close_table_button= tk.Button(
+            self.table_frame,
+            text="Close table",
+            command= self.close_truth_table,
+            bg=theme.BUTTON,
+            fg="white",
+            font=("Courier", 10)
+            )
+        self.close_table_button.pack_forget()
 
 
 
@@ -87,7 +98,7 @@ class MantiqWindow:
             bg=theme.PAPER,
             fg=theme.INK,
             font=("Courier", 12)
-        )#im not even close to finishing this
+        )#go listen to math rock yes thats a real genre its so good man
         self.input_box.pack(pady=10)
         self.insert_button=tk.Button(
             self.left_frame,
@@ -118,6 +129,9 @@ class MantiqWindow:
     def show_truth_table(self):
         if self.current_argument is None:
             return
+        if not self.truth_table.winfo_ismapped():
+            self.truth_table.pack()
+
         
         verifier= Verifier()
         table=verifier.generate_argument_truth_table(self.current_argument)
@@ -161,21 +175,36 @@ class MantiqWindow:
                 tk.END,
                 values=values
             )
+        if not self.close_table_button.winfo_ismapped():
+            self.close_table_button.pack(pady=10)
+
+
+    def close_truth_table(self):
+        self.truth_table.pack_forget()
+        self.close_table_button.pack_forget()
+        for item in self.truth_table.get_children():
+            self.truth_table.delete(item)
+
 
     def insert_card(self):
-        lexer = Lexer()
-        text=self.input_box.get("1.0", tk.END)
-        tokens=lexer.tokenize(text)
-        parser =Parser(tokens)
-        argument=parser.parse_argument()
-        self.current_argument= argument
+       
+        try:
+       
+       
+            lexer = Lexer()
+            text=self.input_box.get("1.0", tk.END)
+            tokens=lexer.tokenize(text)
+            parser =Parser(tokens)
+            argument=parser.parse_argument()
+            self.current_argument= argument
 
-        verifier = Verifier()
-        valid, counterexample = verifier.verify_argument(argument)
+            verifier = Verifier()
+            valid, counterexample = verifier.verify_argument(argument)
 
-        reporter=Reporter()
-        report= reporter.generate(argument, valid, counterexample)
-
-        self.output_box.delete("1.0", tk.END)
-
-        self.output_box.insert(tk.END, report)
+            reporter=Reporter()
+            report= reporter.generate(argument, valid, counterexample)
+            self.output_box.delete("1.0", tk.END)
+            self.output_box.insert(tk.END, report)
+        except Exception as error:
+            self.output_box.delete("1.0", tk.END)
+            self.output_box.insert(tk.END, format_error(error))
