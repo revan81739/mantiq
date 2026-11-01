@@ -7,6 +7,21 @@ class Verifier:
     def __init__(self):
         self.evaluator=Evaluator()
 
+    def generate_argument_truth_table(self, argument):
+        variables=sorted(self.get_argument_variables(argument))
+        table=[]
+        for values in product([False, True], repeat=len(variables)):
+            assignment= dict(zip(variables, values))
+            premises=[self.evaluator.evaluate(premise, assignment)for premise in argument.premises]
+            conclusion= self.evaluator.evaluate(argument.conclusion, assignment)
+            table.append({
+                "assignment": assignment,
+                "premises": premises,
+                "conclusion": conclusion
+            })
+        return table
+
+
     def get_variables(self, node):
         if isinstance(node, Identifier):
             return {node.name}

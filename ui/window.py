@@ -14,6 +14,7 @@ class MantiqWindow:
         self.root.title("Mantiq - Logical Reasoner")
         self.root.geometry("1000x700")
         self.root.configure(bg=theme.BACKGROUND)
+        self.current_argument=None
         self.main_frame=tk.Frame(self.root, bg=theme.BACKGROUND)
         self.main_frame.pack(fill="both", expand =True)
         self.left_frame=tk.Frame(self.main_frame, bg=theme.BACKGROUND)
@@ -47,6 +48,16 @@ class MantiqWindow:
         )
         self.dropdown.config(font=("Courier", 11), width=24)
         self.dropdown.pack(pady=10)
+
+        self.truth_button= tk.Button(
+            self.right_frame,
+            text= "Generate truth table",
+            command= self.show_truth_table,
+            bg= theme.BUTTON,
+            fg="white",
+            font=("Courier", 11)
+        )
+        self.truth_button.pack(pady=40)
 
 
         machine_image=Image.open("assets/machine.png")
@@ -93,13 +104,38 @@ class MantiqWindow:
         self.input_box.delete("1.0", tk.END)
         self.input_box.insert(tk.END, EXAMPLES[selection])
     
-    
+    def show_truth_table(self):
+        if self.current_argument is None:
+            self.output_box.delete("1.0", tk.END)
+            self.output_box.insert(tk.END, "Please insert punch card first")
+            return
+        verifier= Verifier()
+        table=verifier.generate_argument_truth_table(self.current_argument)
+        self.output_box.delete("1.0", tk.END)
+
+        for row in table:
+            self.output_box.insert(
+                tk.END,
+                str(row["assignment"])
+                +
+                " | Premises:"
+                +
+                str(row["premises"])
+                +
+                " | Conclusion:"
+                +
+                str(row["conclusion"])
+                +
+                "\n"
+            )
+
     def insert_card(self):
         lexer = Lexer()
         text=self.input_box.get("1.0", tk.END)
         tokens=lexer.tokenize(text)
         parser =Parser(tokens)
         argument=parser.parse_argument()
+        self.current_argument= argument
 
         verifier = Verifier()
         valid, counterexample = verifier.verify_argument(argument)
