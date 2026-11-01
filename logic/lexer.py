@@ -1,13 +1,14 @@
+import re
 from logic.token import Token
 
 class Lexer:
-    keywords={"IF", "THEN", "AND", "OR", "NOT", "VERIFY"}
+    keywords={"IF", "THEN", "AND", "OR", "NOT", "VERIFY", "(", ")"}
     
     
     def tokenize(self, text):
         tokens=[]
         for line in text.splitlines():
-            words=line.split()
+            words=re.findall(r"\(|\)|[A-Za-z]+", line)
             for word in words:
                 word=word.upper()
                 if word in self.keywords:

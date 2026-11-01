@@ -76,6 +76,10 @@ class Parser:
         return self.parse_primary()
 
     def parse_primary(self):
-        token=self.expect("IDENTIFIER")
+        if self.match("("):
+            expression=self.parse_implication()
+            self.expect(")")
+            return expression
+        token= self.expect("IDENTIFIER")
         return Identifier(token.value)
     
